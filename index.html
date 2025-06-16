@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset = "UTF-8">
+        <meta name="viewport" content="width=device-width", initial-scale="1.0">
+        <title> File Combiner </title>
+        <link rel="stylesheet" href="style.css">
+
+    </head>
+    <body>
+        <div id = "file-select-div">        
+            <div id = "b-flow-div">
+                <p> Select Blood flow txt file </p>
+                <input id = "b-flow" type="file">
+            </div>
+
+            <div id = "e-flow-div">
+                <p> Select Electric flow txt file </p>
+                <input id = "e-flow" type="file">
+            </div>
+        </div>
+        <button id="generate-graph"> Generate Graph </button>
+
+        <div style="overflow: auto; width: 100%; height: 600px;">
+            <canvas id="combined-chart"></canvas>
+        </div>
+        
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src = "script.js"></script>
+    </body>
+</html>
