@@ -23,23 +23,29 @@ class FileDataManager {
     readFromInput(event, key) {
         const reader = new FileReader();
         reader.onload = () => { 
-            if (key == 'bflow') this.bflow = new bflowData(reader.result) 
-            if (key == 'eflow') this.eflow = new eflowData(reader.result)
+            if (key == 'bflow') this.bflow = new bflowData(reader.result); 
+            if (key == 'eflow') this.eflow = new eflowData(reader.result);
+            b_flow_start.value = 0;
         };
         reader.readAsText(event.target.files[0]);
+    }
+
+    plotGraph(){
+
     }
 }
 
 
 
-let bflow = document.getElementById("b-flow")
-let eflow = document.getElementById("e-flow")
+let b_flow_file = document.getElementById("b-flow-file")
+let b_flow_start = document.getElementById("b-flow-start")
+let e_flow_file = document.getElementById("e-flow-file")
 let button1 = document.getElementById("generate-graph")
 
 const manager = new FileDataManager();
-bflow.addEventListener('change', (e) => manager.readFromInput(e, 'bflow'));
-eflow.addEventListener('change', (e) => manager.readFromInput(e, 'eflow'));
-button1.addEventListener('click', plotGraph());
+b_flow_file.addEventListener('change', (e) => manager.readFromInput(e, 'bflow'));
+e_flow_file.addEventListener('change', (e) => manager.readFromInput(e, 'eflow'));
+button1.addEventListener('click', plotGraph);
 
 
 
