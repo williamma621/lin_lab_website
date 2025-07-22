@@ -3,7 +3,9 @@ class bflowData {
         const lines = text.split(/\r\n|\n/);
         this.data = [];
         let i = 0; while (lines[i] != "No: 	Hour 	Min 	Sec 	F1 ") i++;
-        for (i += 1; i < lines.length - 1; i++) this.data.push(lines[i].split("\t")[4])
+        for (i += 1; i < lines.length - 1; i++) this.data.push(lines[i].split("\t")[4]);
+        this.start = 0 
+        this.end = this.data.length - 1
     }
 }
 class eflowData {
@@ -11,42 +13,118 @@ class eflowData {
         const lines = text.split(/\r\n|\n/);
         this.data = [];
         let i = 0; while (lines[i] != "No,Time (hr:min:sec),LeftLU,Event messages") i++;
-        for (i += 1; lines[i]; i++) this.data.push(lines[i].split(",")[2])
+        for (i += 1; lines[i]; i++) this.data.push(lines[i].split(",")[2]);
+        this.start = 0 
+        this.end = this.data.length - 1
+        this.min = Math.min(...this.data)
+        this.max = Math.max(...this.data)
     }
 }
 class FileDataManager {
     constructor() {
-        this.eflow = null;
         this.bflow = null;
+        this.eflow = null;
+        this.chart = null; 
+
+        
+        this.b_start = document.querySelector('.b-flow-inputs .start-time');
+        this.b_end = document.querySelector('.b-flow-inputs .end-time');
+        this.b_min = document.querySelector('.b-flow-inputs .graph-min');
+        this.b_max = document.querySelector('.b-flow-inputs .graph-max');
+
+        this.e_start = document.querySelector('.e-flow-inputs .start-time');
+        this.e_end = document.querySelector('.e-flow-inputs .end-time');
+        this.e_min = document.querySelector('.e-flow-inputs .graph-min');
+        this.e_max = document.querySelector('.e-flow-inputs .graph-max');
+
     }
 
     readFromInput(event, key) {
         const reader = new FileReader();
         reader.onload = () => { 
-            if (key == 'bflow') this.bflow = new bflowData(reader.result); 
-            if (key == 'eflow') this.eflow = new eflowData(reader.result);
-            b_flow_start.value = 0;
+            if (key == 'bflow') {
+                this.bflow = new bflowData(reader.result);
+                this.b_start.value = this.bflow.start;
+                this.b_end.value = this.bflow.end;
+            }
+            if (key == 'eflow') {
+                this.eflow = new eflowData(reader.result);
+                this.e_start.value = this.eflow.start;
+                this.e_end.value = this.eflow.end;
+            }
         };
         reader.readAsText(event.target.files[0]);
     }
-
+    localRange(key){
+        if (key == "bflow"){
+            const local_data = this.bflow.data.slice(this.b_start.value, this.b_end.value)
+            this.b_min.value = Math.min(...local_data)
+            this.b_max.value = Math.max(...local_data)
+        }
+        if (key == "eflow"){
+            const local_data = this.eflow.data.slice(this.e_start.value, this.e_end.value)
+            this.e_min.value = Math.min(...local_data)
+            this.e_max.value = Math.max(...local_data)
+        }
+    }
     plotGraph(){
+        const bloodData = manager.bflow ? manager.bflow.data : [];
+        const bflowParameters = {
+            start: document.querySelector('.b-flow-inputs .start-time').value,
+              end: document.querySelector('.b-flow-inputs .end-time').value,
+              min: document.querySelector('.b-flow-inputs .graph-min').value,
+              max: document.querySelector('.b-flow-inputs .graph-max').value,
 
+        }
+        const electricData = manager.eflow ? manager.eflow.data : [];
+        const eflowParameters = {
+            start: document.querySelector('.e-flow-inputs .start-time').value,
+              end: document.querySelector('.e-flow-inputs .end-time').value,
+              min: document.querySelector('.e-flow-inputs .graph-min').value,
+              max: document.querySelector('.e-flow-inputs .graph-max').value,
+        }
+
+        const graph_start_time = Math.min(bflowParameters['start'], eflowParameters['start'])
+        const graph_end_time = Math.max(bflowParameters['end'], eflowParameters['end'])
+
+        const labels = []
+        for (let i = graph_start_time; i < graph_end_time; i++){labels.push(i)}
+
+        const ctx = document.getElementById('combined-chart').getContext('2d');
+        if (this.chart) {
+            this.chart.data.labels = labels;
+            this.chart.data.datasets[0].data = bloodData.slice(labels[graph_start_time], labels[graph_end_time]);
+            this.chart.data.datasets[1].data = electricData.slice(labels[graph_start_time], labels[graph_end_time]);
+            
+            // Update scales
+            this.chart.options.scales.yBlood.min = bflowParameters['min'];
+            this.chart.options.scales.yBlood.max = bflowParameters['max'];
+            this.chart.options.scales.yElectric.min = eflowParameters['min'];
+            this.chart.options.scales.yElectric.max = eflowParameters['max'];
+            
+            this.chart.update();
+        } 
+        else {
+            this.chart = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [
+                { label: 'Blood Flow', data: bloodData, borderColor: 'red', fill: false, yAxisID: 'yBlood', pointRadius: 0 },
+                { label: 'Electric Flow', data: electricData, borderColor: 'blue', fill: false, yAxisID: 'yElectric', pointRadius: 0} ]},
+                options: { responsive: false, maintainAspectRatio: false, scales: {
+                    x: { title: { display: true, text: 'Time'}},
+                    yBlood: { type: 'linear', position: 'left', text: 'Blood flow scale', min: bflowParameters['min'], max: bflowParameters['max']},
+                    yElectric: { type: 'linear', position: 'right', text: 'Electric flow scale', min: eflowParameters['min'], max: eflowParameters['max']}}}
+                });
+        }
     }
 }
 
 
 
-let b_flow_file = document.getElementById("b-flow-file")
-let b_flow_start = document.getElementById("b-flow-start")
-let e_flow_file = document.getElementById("e-flow-file")
-let button1 = document.getElementById("generate-graph")
-
 const manager = new FileDataManager();
-b_flow_file.addEventListener('change', (e) => manager.readFromInput(e, 'bflow'));
-e_flow_file.addEventListener('change', (e) => manager.readFromInput(e, 'eflow'));
-button1.addEventListener('click', plotGraph);
-
+document.getElementById("b-flow-file").addEventListener('change', (e) => manager.readFromInput(e, 'bflow'));
+document.getElementById("e-flow-file").addEventListener('change', (e) => manager.readFromInput(e, 'eflow'));
+document.getElementById("find-bflow-range").addEventListener('click',() => manager.localRange('bflow'))
+document.getElementById("find-eflow-range").addEventListener('click',() => manager.localRange('eflow'))
+document.getElementById("generate-graph").addEventListener('click', () => manager.plotGraph());
 
 
 function calculate_basic_stats(data){
@@ -77,65 +155,3 @@ function calculate_basic_stats(data){
 
     console.log("t-stats: ", tTestResult);
 }
-
-function plotGraph(){
-
-const bloodData = manager.bflow.data
-const electricData = manager.eflow.data
-const ctx = document.getElementById('combined-chart').getContext('2d');
-const labels = []
-for (let i = 0; i< 2099; i++){labels.push(i)}
-
-new Chart(ctx, {
-type: 'line',
-data: {
-    labels: labels,
-    datasets: [
-    {
-        label: 'Blood Flow',
-        data: bloodData,
-        borderColor: 'red',
-        fill: false,
-        yAxisID: 'yBlood',
-        pointRadius: 0
-    },
-    {
-        label: 'Electric Flow',
-        data: electricData,
-        borderColor: 'blue',
-        fill: false,
-        yAxisID: 'yElectric',
-        pointRadius: 0
-    }
-    ]
-},
-options: {
-    responsive: false,
-    maintainAspectRatio: false,
-
-    scales: {
-    x: {
-        title: {
-        display: true,
-        text: 'Time (HH:MM:SS)'
-        }
-    },
-    yBlood: {
-        type: 'linear',
-        position: 'left',
-        text: 'Blood flow scale'
-    },
-    yElectric: {
-        type: 'linear',
-        position: 'right',
-        text: 'Electric flow scale',
-        min: 2000,
-        max: 2500
-    }
-    }
-}
-});
-
-
-}
-
