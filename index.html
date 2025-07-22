@@ -13,18 +13,30 @@
                 <p> Select blood flow file: </p>
                 <input id = "b-flow" type="file">
             </div>
+                <label for="b-flow-file"> select blood file </label>
+                <input id = "b-flow-file" style="display:none;" type="file"> </br>
+                <label> Input starts at line: </label> <input id = "b-flow-start" type="text"> </br>
+                <label> Min Value: </label> <input id = "b-flow-min" type="text"> </br>
+                <label> Max Value: </label> <input id = "b-flow-max" type="text"> </br>
 
-            <div id = "e-flow-div">
-                <p> Select Electric flow txt file </p>
-                <input id = "e-flow" type="file">
             </div>
+            <hr>
+            <div id = "e-flow-div">
+                <label for="e-flow-file"> select electric file</label>
+                <input id = "e-flow-file" style="display:none;" type="file"> </br>
+                <label> Input starts at line: </label> <input id = "e-flow-start" type="text"> </br>
+                <label> Min Value: </label> <input id = "e-flow-min" type="text"> </br>
+                <label> Max Value: </label> <input id = "e-flow-max" type="text"> </br>
+            </div>
+            <hr>
+            <button id="generate-graph"> Generate Graph </button>
         </div>
-        <button id="generate-graph"> Generate Graph </button>
 
         <div style="overflow: auto; width: 100%; height: 600px;">
             <canvas id="combined-chart"></canvas>
         </div>
-        
+
+        <script src="https://cdn.jsdelivr.net/npm/simple-statistics@latest/dist/simple-statistics.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src = "script.js"></script>
     </body>
