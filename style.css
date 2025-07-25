@@ -7,11 +7,10 @@ body {
 
 #file-select-div {
   margin-left: 10px;
-  margin-top: 50px;
-  width: 500px;
+  margin-top: 80px;
   border: 2px solid #333;
   padding: 15px;
-  max-height: 500px;
+  max-height: 450px;
 }
 
 #b-flow-div,
@@ -42,15 +41,22 @@ body {
 }
 
 #combined-chart {
-  width: 100%;
+  width: 50%;
+  height:100%;
+
+  position:absolute;
+  inset-inline-start: -150px;
 }
 
 #canvas {
+  position: relative;
   margin-top: 20px;
   margin-left: 5px;
-  margin-right: 5px;
-  width: 80%;
-  height: 600px;
+  margin-right: 10px;
   border: 2px solid #333;
+  overflow: scroll;
+
+  width: 80%;
+  height: 850px; 
 
 }
