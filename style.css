@@ -6,12 +6,12 @@ body {
 }
 
 #file-select-div {
-  left: 30%;
-  right: 30%;
-  top: 10%;
-  width: 30%;
+  margin-left: 10px;
+  margin-top: 50px;
+  width: 500px;
   border: 2px solid #333;
-  padding: 20px;
+  padding: 15px;
+  max-height: 500px;
 }
 
 #b-flow-div,
@@ -37,11 +37,20 @@ body {
 #generate-graph{
   margin: auto;
   display: block;
-  width: 70%;
+  width: 100%;
   height: 40px;
 }
 
 #combined-chart {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+}
+
+#canvas {
+  margin-top: 20px;
+  margin-left: 5px;
+  margin-right: 5px;
+  width: 80%;
+  height: 600px;
+  border: 2px solid #333;
+
 }
