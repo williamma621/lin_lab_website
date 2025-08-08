@@ -6,7 +6,7 @@ body {
 #file-select-div {
   text-align: center;
   padding: 1em;
-  width: 22em;
+  width: 28em;
   height: fit-content;
   border: 2px solid #333;
 }
@@ -17,12 +17,10 @@ body {
   transition: transform 0.2s ease;
 }
 
-
 #b-flow-div input[type="file"],
 #e-flow-div input[type="file"]{
   max-width: 25%;
 }
-
 
 #b-flow-div input[type="text"],
 #e-flow-div input[type="text"]{
@@ -45,7 +43,7 @@ body {
   overflow: scroll;
   position: relative;
   width: 80%;
-  height: 45em;
+  height: 95vh;
   margin-left: 1em;
   border: 2px solid black;
 }

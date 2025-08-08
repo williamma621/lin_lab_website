@@ -118,7 +118,6 @@ class FileDataManager {
 }
 
 
-
 const manager = new FileDataManager();
 document.getElementById("b-flow-file").addEventListener('change', (e) => manager.readFromInput(e, 'bflow'));
 document.getElementById("e-flow-file").addEventListener('change', (e) => manager.readFromInput(e, 'eflow'));
@@ -155,3 +154,6 @@ function calculate_basic_stats(data){
 
     console.log("t-stats: ", tTestResult);
 }
+
+document.getElementById('combined-chart').width = document.getElementById('canvas-div').clientWidth;
+document.getElementById('combined-chart').height = document.getElementById('canvas-div').clientHeight;  
