@@ -63,8 +63,8 @@ class FileDataManager {
         }
         if (key == "eflow"){
             const local_data = this.eflow.data.slice(this.e_start.value, this.e_end.value)
-            this.e_min.value = Math.min(...local_data)
-            this.e_max.value = Math.max(...local_data)
+            this.e_min.value = parseFloat(Math.min(...local_data))
+            this.e_max.value = parseFloat(Math.max(...local_data))
         }
     }
     plotGraph(){
@@ -110,9 +110,9 @@ class FileDataManager {
                 { label: 'Electric Flow', data: electricData, borderColor: 'blue', fill: false, yAxisID: 'yElectric', pointRadius: 0} ]},
                 options: { responsive: false, maintainAspectRatio: false, scales: {
                     x: { title: { display: true, text: 'Time'}},
-                    yBlood: { type: 'linear', position: 'left', text: 'Blood flow scale', min: bflowParameters['min'], max: bflowParameters['max']},
-                    yElectric: { type: 'linear', position: 'right', text: 'Electric flow scale', min: eflowParameters['min'], max: eflowParameters['max']}}}
-                });
+                    yBlood: { type: 'linear', position: 'left', text: 'Blood flow scale', min: bflowParameters['min'], max: bflowParameters['max'], ticks: {callback: function(value) { return value; }}},
+                    yElectric: { type: 'linear', position: 'right', text: 'Electric flow scale', min: eflowParameters['min'], max: eflowParameters['max'], ticks: {callback: function(value) { return value; }}}
+                }}});
         }
     }
 }
@@ -155,5 +155,15 @@ function calculate_basic_stats(data){
     console.log("t-stats: ", tTestResult);
 }
 
+
+function resizeCanvas() {
+  const canvas_div = document.getElementById('canvas-div');
 document.getElementById('combined-chart').width = document.getElementById('canvas-div').clientWidth;
-document.getElementById('combined-chart').height = document.getElementById('canvas-div').clientHeight;  
+document.getElementById('combined-chart').height = document.getElementById('canvas-div').clientHeight;  
+
+  canvas.width = canvasDiv.clientWidth;
+  canvas.height = canvasDiv.clientHeight;
+}
+
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
