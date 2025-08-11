@@ -1,128 +1,116 @@
-class bflowData {
-    constructor(text){
-        const lines = text.split(/\r\n|\n/);
-        this.data = [];
+class Experiment {
+    constructor(bloodData, electricData){
+        this.data = {
+            bloodData: this.parseBlood(bloodData),
+            electricData: this.parseElectric(electricData),
+        }
+    }
+    parseBlood(raw_data){
+        const data = [];
+        const lines = raw_data.split(/\r\n|\n/);
         let i = 0; while (lines[i] != "No: 	Hour 	Min 	Sec 	F1 ") i++;
-        for (i += 1; i < lines.length - 1; i++) this.data.push(lines[i].split("\t")[4]);
-        this.start = 0 
-        this.end = this.data.length - 1
+        for (i += 1; i < lines.length - 1; i++) data.push(lines[i].split("\t")[4]);
+        return data
     }
-}
-class eflowData {
-    constructor(text){
-        const lines = text.split(/\r\n|\n/);
-        this.data = [];
+    parseElectric(raw_data){
+        const data = [];
+        const lines = raw_data.split(/\r\n|\n/);
         let i = 0; while (lines[i] != "No,Time (hr:min:sec),LeftLU,Event messages") i++;
-        for (i += 1; lines[i]; i++) this.data.push(lines[i].split(",")[2]);
-        this.start = 0 
-        this.end = this.data.length - 1
-        this.min = Math.min(...this.data)
-        this.max = Math.max(...this.data)
+        for (i += 1; lines[i]; i++) data.push(lines[i].split(",")[2]);
+        return data
     }
 }
-class FileDataManager {
+class FrontEndManager {
     constructor() {
-        this.bflow = null;
-        this.eflow = null;
+        this.raw_data = {blood: null, electric: null};
+        this.experiment = null;
         this.chart = null; 
 
-        
-        this.b_start = document.querySelector('.b-flow-inputs .start-time');
-        this.b_end = document.querySelector('.b-flow-inputs .end-time');
-        this.b_min = document.querySelector('.b-flow-inputs .graph-min');
-        this.b_max = document.querySelector('.b-flow-inputs .graph-max');
+        this.divs = { div1: this.getContainerElements('data-input-1'),
+                          div2: this.getContainerElements('data-input-2')};
 
-        this.e_start = document.querySelector('.e-flow-inputs .start-time');
-        this.e_end = document.querySelector('.e-flow-inputs .end-time');
-        this.e_min = document.querySelector('.e-flow-inputs .graph-min');
-        this.e_max = document.querySelector('.e-flow-inputs .graph-max');
-
+        this.initEventListeners();
     }
-
     readFromInput(event, key) {
         const reader = new FileReader();
-        reader.onload = () => { 
-            if (key == 'bflow') {
-                this.bflow = new bflowData(reader.result);
-                this.b_start.value = this.bflow.start;
-                this.b_end.value = this.bflow.end;
-            }
-            if (key == 'eflow') {
-                this.eflow = new eflowData(reader.result);
-                this.e_start.value = this.eflow.start;
-                this.e_end.value = this.eflow.end;
-            }
-        };
+        reader.onload = () => { this.raw_data[key] = reader.result; };
         reader.readAsText(event.target.files[0]);
     }
-    localRange(key){
-        if (key == "bflow"){
-            const local_data = this.bflow.data.slice(this.b_start.value, this.b_end.value)
-            this.b_min.value = Math.min(...local_data)
-            this.b_max.value = Math.max(...local_data)
-        }
-        if (key == "eflow"){
-            const local_data = this.eflow.data.slice(this.e_start.value, this.e_end.value)
-            this.e_min.value = parseFloat(Math.min(...local_data))
-            this.e_max.value = parseFloat(Math.max(...local_data))
-        }
+    createExperiment(){ this.experiment = new Experiment(this.fileContents['blood'], this.fileContents['electric']); }
+    getContainerElements(containerId) {
+        const container = document.getElementById(containerId);
+        return {
+            container,
+            file: container.querySelector('.file-select'),
+            start: container.querySelector('.start-time'),
+            end: container.querySelector('.end-time'),
+            min: container.querySelector('.graph-min'),
+            max: container.querySelector('.graph-max')
+        };}
+
+    initEventListeners(){
+        this.divs.div1.file.addEventListener('change', () => this.findTimeRange('div1'));
+        this.divs.div1.container.querySelector('.find-local-range').addEventListener('click', ()=> this.findLocalRange('div1'));
+        this.divs.div2.file.addEventListener('change', () => this.findTimeRange('div2'));
+        this.divs.div2.container.querySelector('.find-local-range').addEventListener('click', ()=> this.findLocalRange('div2'));
     }
+    getDivData(divId) {
+        const div = this.divs[divId];
+        const fileKey = div.file.value;
+        const data = this.experiment.data[fileKey];
+        return [data, div];
+    }
+    findTimeRange(divId) {
+        const [data, div] = this.getDivData(divId);
+        div.start.value = 0;
+        div.end.value = data.length - 1;
+    }
+    findLocalRange(divId){
+        const [data, div] = this.getDivData(divId);
+        const local_data = data.slice(div.start.value, div.end.value);
+        div.min.value = Math.min(...local_data);
+        div.max.value = Math.max(...local_data);
+    }    
     plotGraph(){
-        const bloodData = manager.bflow ? manager.bflow.data : [];
-        const bflowParameters = {
-            start: document.querySelector('.b-flow-inputs .start-time').value,
-              end: document.querySelector('.b-flow-inputs .end-time').value,
-              min: document.querySelector('.b-flow-inputs .graph-min').value,
-              max: document.querySelector('.b-flow-inputs .graph-max').value,
-
-        }
-        const electricData = manager.eflow ? manager.eflow.data : [];
-        const eflowParameters = {
-            start: document.querySelector('.e-flow-inputs .start-time').value,
-              end: document.querySelector('.e-flow-inputs .end-time').value,
-              min: document.querySelector('.e-flow-inputs .graph-min').value,
-              max: document.querySelector('.e-flow-inputs .graph-max').value,
-        }
-
-        const graph_start_time = Math.min(bflowParameters['start'], eflowParameters['start'])
-        const graph_end_time = Math.max(bflowParameters['end'], eflowParameters['end'])
-
+        const [data1, div1] = this.getDivData('div1');
+        const [data2, div2] = this.getDivData('div2');
+        const graph_start_time = Math.min(div1.start.value, div2.start.value)
+        const graph_end_time = Math.max(div1.end.value, div2.end.value)
         const labels = []
         for (let i = graph_start_time; i < graph_end_time; i++){labels.push(i)}
 
         const ctx = document.getElementById('combined-chart').getContext('2d');
+
         if (this.chart) {
             this.chart.data.labels = labels;
-            this.chart.data.datasets[0].data = bloodData.slice(labels[graph_start_time], labels[graph_end_time]);
-            this.chart.data.datasets[1].data = electricData.slice(labels[graph_start_time], labels[graph_end_time]);
+            this.chart.data.datasets[0].data = data1.slice(div1.start.value, div1.end.value);
+            this.chart.data.datasets[1].data = data2.slice(div2.start.value, div2.end.value);
             
             // Update scales
-            this.chart.options.scales.yBlood.min = bflowParameters['min'];
-            this.chart.options.scales.yBlood.max = bflowParameters['max'];
-            this.chart.options.scales.yElectric.min = eflowParameters['min'];
-            this.chart.options.scales.yElectric.max = eflowParameters['max'];
-            
+            this.chart.options.scales.yBlood.min = div1.min.value;
+            this.chart.options.scales.yBlood.max = div1.max.value;
+            this.chart.options.scales.yElectric.min = div2.min.value;
+            this.chart.options.scales.yElectric.max = div2.max.value;
             this.chart.update();
         } 
         else {
             this.chart = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [
-                { label: 'Blood Flow', data: bloodData, borderColor: 'red', fill: false, yAxisID: 'yBlood', pointRadius: 0 },
-                { label: 'Electric Flow', data: electricData, borderColor: 'blue', fill: false, yAxisID: 'yElectric', pointRadius: 0} ]},
+                { label: 'Blood Flow', data: data1, borderColor: 'red', fill: false, yAxisID: 'yBlood', pointRadius: 0 },
+                { label: 'Electric Flow', data: data2, borderColor: 'blue', fill: false, yAxisID: 'yElectric', pointRadius: 0} ]},
                 options: { responsive: false, maintainAspectRatio: false, scales: {
                     x: { title: { display: true, text: 'Time'}},
-                    yBlood: { type: 'linear', position: 'left', text: 'Blood flow scale', min: bflowParameters['min'], max: bflowParameters['max'], ticks: {callback: function(value) { return value; }}},
-                    yElectric: { type: 'linear', position: 'right', text: 'Electric flow scale', min: eflowParameters['min'], max: eflowParameters['max'], ticks: {callback: function(value) { return value; }}}
+                    yBlood: { type: 'linear', position: 'left', text: 'Blood flow scale', min: div1.min.value, max: div1.max.value, ticks: {callback: function(value) { return value; }}},
+                    yElectric: { type: 'linear', position: 'right', text: 'Electric flow scale', min: div2.min.value, max: div2.max.value, ticks: {callback: function(value) { return value; }}}
                 }}});
         }
     }
 }
 
 
-const manager = new FileDataManager();
-document.getElementById("b-flow-file").addEventListener('change', (e) => manager.readFromInput(e, 'bflow'));
-document.getElementById("e-flow-file").addEventListener('change', (e) => manager.readFromInput(e, 'eflow'));
-document.getElementById("find-bflow-range").addEventListener('click',() => manager.localRange('bflow'))
-document.getElementById("find-eflow-range").addEventListener('click',() => manager.localRange('eflow'))
+const manager = new FrontEndManager();
+document.getElementById("blood-file-input").addEventListener('change', (e) => manager.readFromInput(e, 'blood'));
+document.getElementById("electric-file-input").addEventListener('change', (e) => manager.readFromInput(e, 'electric'));
+document.getElementById("submit-file-input").addEventListener('click', () => manager.createExperiment());
 document.getElementById("generate-graph").addEventListener('click', () => manager.plotGraph());
 
 
@@ -157,10 +145,8 @@ function calculate_basic_stats(data){
 
 
 function resizeCanvas() {
-  const canvas_div = document.getElementById('canvas-div');
-document.getElementById('combined-chart').width = document.getElementById('canvas-div').clientWidth;
-document.getElementById('combined-chart').height = document.getElementById('canvas-div').clientHeight;  
-
+  const canvasDiv = document.getElementById('canvas-div');
+  const canvas = document.getElementById('combined-chart');
   canvas.width = canvasDiv.clientWidth;
   canvas.height = canvasDiv.clientHeight;
 }

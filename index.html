@@ -9,43 +9,92 @@
     </head>
 
     <body>
-        <div id = "file-select-div">        
-            <div id = "b-flow-div" class = "b-flow-inputs">
-                <label for="b-flow-file">Select blood file: </label>
-                    <input id = "b-flow-file" class = "file" type="file" accept=".csv, .txt" required> <p></p>
+        <div id = "file-select-div"> 
+            <div id = "load-experiment">
+                <label for="blood-file-input" class="custom-file-input"> Choose LDF File </label>
+                <input id="blood-file-input" type="file" style="display: none;">
+
+                <label for="electric-file-input" class="custom-file-input"> Choose AMI File </label>
+                <input id="electric-file-input" type="file" style="display: none;">
+
+                <button id = "submit-file-input"> OK </button>
+            </div> <hr>
+
+            <div id = "data-input-1">
+                <select class="file-select">
+                    <option value=""> Choose a file </option>
+                    <option value="bloodData"> LDF File (Blood)</option>
+                    <option value="electricData"> AMI File (Electric) </option>
+                </select> 
+                <button class="find-local-range"> Find Local Range </button> <p></p>
+
                 <label> Time From: </label> 
                     <input class = "start-time" type="text">
                 <label> To: </label> 
                     <input class = "end-time" type="text"> <span> (Seconds)</span> <p></p>
-                <button id="find-bflow-range"> Find Local Range </button> <p></p>
+
                 <label> Range From: </label>
                     <input class = "graph-min" type="text">
                 <label> To: </label> 
                     <input  class = "graph-max" type="text"> <span> (Min, Max)</span> <p></p>
-            </div>
+            </div> <hr>
 
-            <hr>
+            <div id = "data-input-2">
+                <select class="file-select">
+                    <option value=""> Choose a file </option>
+                    <option value="bloodData"> LDF File (Blood)</option>
+                    <option value="electricData"> AMI File (Electric) </option>
+                </select> 
+                <button class="find-local-range"> Find Local Range </button> <p></p>
 
-            <div id = "e-flow-div" class = "e-flow-inputs">
-                <label for="e-flow-file"> Select electric file:</label>
-                    <input id = "e-flow-file" class = "file" type="file" accept=".csv, .txt" required> <p></p>
                 <label> Time From: </label> 
                     <input class = "start-time" type="text">
                 <label> To: </label> 
                     <input class = "end-time" type="text"> <span> (Seconds)</span> <p></p>
-                <button id="find-eflow-range"> Find Local Range </button> <p></p>
-                    <label> Range From: </label>
+
+                <label> Range From: </label>
                     <input class = "graph-min" type="text">
-                <label> To: </label>
-                    <input class = "graph-max" type="text"> <span> (Min, Max)</span> <p></p>
-            </div>
-            </hr>
-            <button id="generate-graph"> Generate Graph </button>
+                <label> To: </label> 
+                    <input  class = "graph-max" type="text"> <span> (Min, Max)</span> <p></p>
+            </div> <hr>
+
+
+        <!-- <div id = "b-flow-div" class = "b-flow-inputs">
+            <label for="b-flow-file">Select blood file: </label>
+                <input id = "b-flow-file" class = "file" type="file" accept=".csv, .txt" required> <p></p>
+            <label> Time From: </label> 
+                <input class = "start-time" type="text">
+            <label> To: </label> 
+                <input class = "end-time" type="text"> <span> (Seconds)</span> <p></p>
+            <button id="find-bflow-range"> Find Local Range </button> <p></p>
+            <label> Range From: </label>
+                <input class = "graph-min" type="text">
+            <label> To: </label> 
+                <input  class = "graph-max" type="text"> <span> (Min, Max)</span> <p></p>
         </div>
 
-        <div id = "canvas-div">
-            <canvas id="combined-chart"></canvas>
+        <hr>
+
+        <div id = "e-flow-div" class = "e-flow-inputs">
+            <label for="e-flow-file"> Select electric file:</label>
+                <input id = "e-flow-file" class = "file" type="file" accept=".csv, .txt" required> <p></p>
+            <label> Time From: </label> 
+                <input class = "start-time" type="text">
+            <label> To: </label> 
+                <input class = "end-time" type="text"> <span> (Seconds)</span> <p></p>
+            <button id="find-eflow-range"> Find Local Range </button> <p></p>
+                <label> Range From: </label>
+                <input class = "graph-min" type="text">
+            <label> To: </label>
+                <input class = "graph-max" type="text"> <span> (Min, Max)</span> <p></p>
         </div>
+        </hr> -->
+        <button id="generate-graph"> Generate Graph </button>
+    </div>
+
+    <div id = "canvas-div">
+        <canvas id="combined-chart"></canvas>
+    </div>
 
 
     <script src="https://cdn.jsdelivr.net/npm/simple-statistics@latest/dist/simple-statistics.min.js"></script>

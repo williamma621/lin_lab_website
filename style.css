@@ -4,7 +4,6 @@ body {
 }
 
 #file-select-div {
-  text-align: center;
   padding: 1em;
   width: 28em;
   height: fit-content;
@@ -13,6 +12,7 @@ body {
 
 #b-flow-div,
 #e-flow-div {
+  text-align: center;
   background-color: #f9f9f9;
   transition: transform 0.2s ease;
 }
@@ -45,10 +45,25 @@ body {
 
 #canvas-div {
   overflow: scroll;
-  overflow: scroll;
   position: relative;
   width: 80%;
   height: 95vh;
   margin-left: 1em;
   border: 2px solid black;
+}
+
+
+.custom-file-input {
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
+    background: #4CAF50;
+    color: white;
+    border-radius: 4px;
+}
+
+
+#data-input-1 input[type="text"],
+#data-input-2 input[type="text"]{
+  width: 10%;
 }
