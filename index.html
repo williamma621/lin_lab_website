@@ -11,11 +11,17 @@
     <body>
         <div id = "file-select-div"> 
             <div id = "load-experiment">
-                <label for="blood-file-input" class="custom-file-input"> Choose LDF File </label>
-                <input id="blood-file-input" type="file" style="display: none;">
+                <label for="blood-file-input" class="custom-file-input">Choose LDF File</label>
+                <input id="blood-file-input" 
+                    type="file" 
+                    accept=".csv, .txt"required 
+                    style="display: none;">
 
                 <label for="electric-file-input" class="custom-file-input"> Choose AMI File </label>
-                <input id="electric-file-input" type="file" style="display: none;">
+                <input id="electric-file-input"
+                    type="file"
+                    accept=".csv, .txt" required
+                    style="display: none">
 
                 <button id = "submit-file-input"> OK </button>
             </div> <hr>

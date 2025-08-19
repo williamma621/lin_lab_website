@@ -36,7 +36,7 @@ class FrontEndManager {
         reader.onload = () => { this.raw_data[key] = reader.result; };
         reader.readAsText(event.target.files[0]);
     }
-    createExperiment(){ this.experiment = new Experiment(this.fileContents['blood'], this.fileContents['electric']); }
+    createExperiment(){ this.experiment = new Experiment(this.raw_data['blood'], this.raw_data['electric']); }
     getContainerElements(containerId) {
         const container = document.getElementById(containerId);
         return {
