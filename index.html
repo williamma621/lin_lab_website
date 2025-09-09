@@ -9,6 +9,7 @@
     </head>
 
     <body>
+        <div>
         <div id = "file-select-div"> 
             <div id = "load-experiment">
                 <label for="blood-file-input" class="custom-file-input">Choose LDF File</label>
@@ -27,6 +28,7 @@
             </div> <hr>
 
             <div id = "data-input-1">
+                <span> Data 1 </span>
                 <select class="file-select">
                     <option value=""> Choose a file </option>
                     <option value="bloodData"> LDF File (Blood)</option>
@@ -46,6 +48,7 @@
             </div> <hr>
 
             <div id = "data-input-2">
+                <span> Data 2 </span>
                 <select class="file-select">
                     <option value=""> Choose a file </option>
                     <option value="bloodData"> LDF File (Blood)</option>
@@ -96,6 +99,23 @@
         </div>
         </hr> -->
         <button id="generate-graph"> Generate Graph </button>
+    </div>
+    <br>
+    <div id = "data-analyze-div">
+        <button id = "basic-stats"> Compare Basic Stats </button>
+        <p>
+            Data1 Mean: <br>
+            Data1 Standard Deviation: 
+        </p>
+        <p>
+            Data2 Mean: <br>
+            Data2 Standard Deviation: 
+        </p>
+        <p>
+            Comparison Results: 
+        </p>
+    </div>
+
     </div>
 
     <div id = "canvas-div">
