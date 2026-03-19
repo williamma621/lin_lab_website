@@ -6,13 +6,16 @@ class Experiment {
         }
     }
     parseBlood(raw_data){
+        if (raw_data == null){return null}
         const data = [];
-        const lines = raw_data.split(/\r\n|\n/);
-        let i = 0; while (lines[i] != "No: 	Hour 	Min 	Sec 	F1 ") i++;
+        const lines = raw_data.split(/\r\n|\n|\r/);
+        let i = 0; while (lines[i] != "4) Trace Data") i++;
+        i++;
         for (i += 1; i < lines.length - 1; i++) data.push(lines[i].split("\t")[4]);
         return data
     }
     parseElectric(raw_data){
+        if (raw_data == null){return null}
         const data = [];
         const lines = raw_data.split(/\r\n|\n/);
         let i = 0; while (lines[i] != "No,Time (hr:min:sec),LeftLU,Event messages") i++;
@@ -24,12 +27,17 @@ class Experiment {
     }
     Mean(type, start, end){
         const part = Slice(type, start, end);
-        return ss.mean(part)
+        return ss.mean(part);
     }
 
     standardDeviation(type, start, end){
         const part = Slice(type, start, end);
-        return ss.standardDeviation(part)
+        return ss.standardDeviation(part);
+    }
+
+    compare(type1, start1, end1, type2, start2, end2){
+        const part1 = Slice(type1, start1, end1);
+        const part2 = Slice(type2, start2, end2);
     }
 }
 
@@ -117,7 +125,7 @@ class FrontEndManager {
         const [data2, div2] = this.getDivData('div2');
         const dataset1 = data1.map((y, i) => ({ x: i, y }));
         const dataset2 = data2.map((y, i) => ({ x: i, y }));
-        const xLength = Math.max(div1.end.value - div1.start.value, div2.end.value - div2.start.value)
+        const xLength = Math.max(div1.end.value - div1.start.value, 0)//div2.end.value - div2.start.value)
 
         // const graph_start_time = Math.min(div1.start.value, div2.start.value)
         // const graph_end_time = Math.max(div1.end.value, div2.end.value)
@@ -157,13 +165,15 @@ class FrontEndManager {
                     label: 'data1', data: dataset1,
                     borderColor: 'red', fill: false,
                     xAxisID: 'x1', yAxisID: 'y1',
-                    pointRadius: 0
+                    pointRadius: 0,
+                    borderWidth: 0.5,
                 },
                 {
                     label: 'data2', data: dataset2,
                     borderColor: 'blue', fill: false,
                     xAxisID: 'x2', yAxisID: 'y2',
-                    pointRadius: 0
+                    pointRadius: 0,
+                    borderWidth: 0.5, 
                 }
             ]},
             options: {
@@ -173,30 +183,35 @@ class FrontEndManager {
                     position: 'bottom',
                     title: { display: true, text: 'Data1 Time' },
                     min: div1.start.value,
-                    max: Number(div1.start.value) + xLength,
-                    ticks: {callback: function(value) { return value; }}
-                },
+                    max: Number(div1.start.value) + xLength,                    
+                    ticks: {
+                        callback: function(value) { return value; }
+                    }
+
+                    },
                 x2: {
                     type: 'linear',
                     position: 'bottom',
                     title: { display: true, text: 'Data2 Time' },
                     min: div2.start.value,
                     max: Number(div2.start.value) + xLength,
-                    ticks: {callback: function(value) { return value; }}
+                    ticks: {
+                        callback: function(value) { return value; }
+                    }
                 },
-                'y1': {
+                y1: {
                     type: 'linear', position: 'left',
                     text: 'data1 values', 
                     min: div1.min.value, max: div1.max.value,
                     ticks: {callback: function(value) { return value; }}},
-                'y2': {
+                y2: {
                     type: 'linear', position: 'right',
                     text: 'data2 values',
                     min: div2.min.value, max: div2.max.value,
                     ticks: {callback: function(value) { return value; }}}
-                }
             }
-            });
+            }
+        });
 
 
             // this.chart = new Chart(ctx, { type: 'line', data: {labels: labels, datasets: [
