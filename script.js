@@ -73,7 +73,8 @@ class FrontEndManager {
     constructor() {
         this.raw_data = {blood: null, electric: null};
         this.experiment = null;
-        this.chart = null; 
+        this.chart = null;
+        this.normalizeToggle = document.getElementById('normalize-mode');
 
         this.divs = { div1: this.getContainerElements('data-input-1'),
                           div2: this.getContainerElements('data-input-2')};
@@ -94,7 +95,9 @@ class FrontEndManager {
             start: container.querySelector('.start-time'),
             end: container.querySelector('.end-time'),
             min: container.querySelector('.graph-min'),
-            max: container.querySelector('.graph-max')
+            max: container.querySelector('.graph-max'),
+            color: container.querySelector('.line-color'),
+            width: container.querySelector('.line-width')
         };}
 
     initEventListeners(){
@@ -109,6 +112,35 @@ class FrontEndManager {
         const data = this.experiment.data[fileKey];
         return [data, div];
     }
+    getRangeBounds(div) {
+        const start = Number(div.start.value);
+        const end = Number(div.end.value);
+        return {
+            start: Number.isFinite(start) ? start : 0,
+            end: Number.isFinite(end) ? end : 0
+        };
+    }
+    getDisplayedData(data, div) {
+        const numericData = data.map((value) => Number(value));
+
+        if (!this.normalizeToggle.checked) {
+            return numericData;
+        }
+
+        const { start, end } = this.getRangeBounds(div);
+        const selectedRange = numericData.slice(start, end);
+
+        if (!selectedRange.length) {
+            return numericData.map(() => 0);
+        }
+
+        const mean = ss.mean(selectedRange);
+        if (!Number.isFinite(mean) || mean === 0) {
+            return numericData.map(() => 0);
+        }
+
+        return numericData.map((value) => ((value - mean) / mean) * 100);
+    }
     findTimeRange(divId) {
         const [data, div] = this.getDivData(divId);
         div.start.value = 0;
@@ -116,16 +148,25 @@ class FrontEndManager {
     }
     findLocalRange(divId){
         const [data, div] = this.getDivData(divId);
-        const local_data = data.slice(div.start.value, div.end.value);
+        const displayedData = this.getDisplayedData(data, div);
+        const { start, end } = this.getRangeBounds(div);
+        const local_data = displayedData.slice(start, end);
         div.min.value = Math.min(...local_data);
         div.max.value = Math.max(...local_data);
     }    
     plotGraph(){
         const [data1, div1] = this.getDivData('div1');
         const [data2, div2] = this.getDivData('div2');
-        const dataset1 = data1.map((y, i) => ({ x: i, y }));
-        const dataset2 = data2.map((y, i) => ({ x: i, y }));
+        const displayedData1 = this.getDisplayedData(data1, div1);
+        const displayedData2 = this.getDisplayedData(data2, div2);
+        const dataset1 = displayedData1.map((y, i) => ({ x: i, y }));
+        const dataset2 = displayedData2.map((y, i) => ({ x: i, y }));
         const xLength = Math.max(div1.end.value - div1.start.value, 0)//div2.end.value - div2.start.value)
+        const lineColor1 = div1.color.value;
+        const lineColor2 = div2.color.value;
+        const lineWidth1 = Number(div1.width.value) || 1;
+        const lineWidth2 = Number(div2.width.value) || 1;
+        const yAxisTitle = this.normalizeToggle.checked ? 'Percent deviation from selected mean' : 'Value';
 
         // const graph_start_time = Math.min(div1.start.value, div2.start.value)
         // const graph_end_time = Math.max(div1.end.value, div2.end.value)
@@ -147,6 +188,10 @@ class FrontEndManager {
             // this.chart.update();
             this.chart.data.datasets[0].data = dataset1;
             this.chart.data.datasets[1].data = dataset2;
+            this.chart.data.datasets[0].borderColor = lineColor1;
+            this.chart.data.datasets[1].borderColor = lineColor2;
+            this.chart.data.datasets[0].borderWidth = lineWidth1;
+            this.chart.data.datasets[1].borderWidth = lineWidth2;
             this.chart.options.scales.x1.min = div1.start.value;
             this.chart.options.scales.x1.max = Number(div1.start.value) + xLength
             this.chart.options.scales.x2.min = div2.start.value;
@@ -155,6 +200,8 @@ class FrontEndManager {
             this.chart.options.scales.y1.max = div1.max.value;
             this.chart.options.scales.y2.min = div2.min.value;
             this.chart.options.scales.y2.max = div2.max.value;
+            this.chart.options.scales.y1.title.text = yAxisTitle;
+            this.chart.options.scales.y2.title.text = yAxisTitle;
             this.chart.update();
         } 
         else {
@@ -163,17 +210,17 @@ class FrontEndManager {
             data: { datasets: [
                 {
                     label: 'data1', data: dataset1,
-                    borderColor: 'red', fill: false,
+                    borderColor: lineColor1, fill: false,
                     xAxisID: 'x1', yAxisID: 'y1',
                     pointRadius: 0,
-                    borderWidth: 0.5,
+                    borderWidth: lineWidth1,
                 },
                 {
                     label: 'data2', data: dataset2,
-                    borderColor: 'blue', fill: false,
+                    borderColor: lineColor2, fill: false,
                     xAxisID: 'x2', yAxisID: 'y2',
                     pointRadius: 0,
-                    borderWidth: 0.5, 
+                    borderWidth: lineWidth2, 
                 }
             ]},
             options: {
@@ -201,12 +248,12 @@ class FrontEndManager {
                 },
                 y1: {
                     type: 'linear', position: 'left',
-                    text: 'data1 values', 
+                    title: { display: true, text: yAxisTitle },
                     min: div1.min.value, max: div1.max.value,
                     ticks: {callback: function(value) { return value; }}},
                 y2: {
                     type: 'linear', position: 'right',
-                    text: 'data2 values',
+                    title: { display: true, text: yAxisTitle },
                     min: div2.min.value, max: div2.max.value,
                     ticks: {callback: function(value) { return value; }}}
             }
